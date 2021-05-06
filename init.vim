@@ -35,12 +35,14 @@ call plug#begin(expand('~/.config/nvim/plugged'))
 "" Plug custom packages
 "*****************************************************************************
 Plug 'unblevable/quick-scope'
-Plug 'frazrepo/fim-rainbow'
 Plug 'preservim/nerdcommenter'
 Plug 'liuchengxu/vim-which-key'
 Plug 'voldikss/vim-floaterm'
-
-
+Plug 'morhetz/gruvbox'
+Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
+Plug 'Xuyuanp/nerdtree-git-plugin'
+Plug 'ryanoasis/vim-devicons'
+Plug 'pbrisbin/vim-mkdir'
 "*****************************************************************************
 "" Plug install packages
 "*****************************************************************************
@@ -59,7 +61,6 @@ Plug 'dense-analysis/ale'
 Plug 'Yggdroot/indentLine'
 Plug 'editor-bootstrap/vim-bootstrap-updater'
 Plug 'tpope/vim-rhubarb' " required by fugitive to :Gbrowse
-Plug 'dracula/vim', { 'as': 'dracula' }
 
 
 if isdirectory('/usr/local/opt/fzf')
@@ -172,6 +173,25 @@ set autoindent
 set smartindent
 set smarttab
 set list
+set showcmd
+set ruler
+
+
+" Enable CursorLine
+set cursorline
+
+highlight  CursorLine ctermbg=Yellow ctermfg=None
+autocmd InsertEnter * highlight  CursorLine ctermbg=Green ctermfg=Red
+autocmd InsertLeave * highlight  CursorLine ctermbg=Yellow ctermfg=None
+
+
+
+
+
+
+
+
+
 
 
 set fileformats=unix
@@ -196,7 +216,12 @@ set ruler
 set number relativenumber
 
 let no_buffers_menu=1
-colorscheme dracula
+
+if (has("termguicolors"))
+ set termguicolors
+endif
+set background=dark
+colorscheme gruvbox
 
 
 set mousemodel=popup
@@ -218,7 +243,7 @@ else
   let g:indentLine_char = '┆'
   let g:indentLine_faster = 1
 
-  
+
 endif
 
 
@@ -418,7 +443,7 @@ let g:UltiSnipsEditSplit="vertical"
 let g:ale_linters = {}
 
 " Tagbar
-nmap <silent> <F4> :TagbarToggle<CR>
+nmap <silent> <F3> :TagbarToggle<CR>
 let g:tagbar_autofocus = 1
 
 " Disable visualbell
@@ -615,10 +640,10 @@ endif
 
 
 """"""""""""  Floaterm
-let g:floaterm_keymap_toggle = '<F1>'
-let g:floaterm_keymap_next   = '<F2>'
-let g:floaterm_keymap_prev   = '<F3>'
-let g:floaterm_keymap_new    = '<F4>'
+let g:floaterm_keymap_toggle = '<F4>'
+let g:floaterm_keymap_next   = '<F5>'
+let g:floaterm_keymap_prev   = '<F6>'
+let g:floaterm_keymap_new    = '<F7>'
 let g:floaterm_gitcommit='floaterm'
 let g:floaterm_autoinsert=1
 let g:floaterm_width=0.8
@@ -691,20 +716,10 @@ call which_key#register('<Space>', "g:which_key_map")
 
 
 """""""""""" NERD Commenter
- vmap <C-/> <plug>NERDCommenterToggle 
+ vmap <C-/> <plug>NERDCommenterToggle
  nmap <C-/> <plug>NERCommenterToggleD
 
 
-"""""""""""" Rainbow Parentheses
-let g:rainbow_active = 1
-let g:rainbow_load_separately = [
-    \ [ '*' , [['(', ')'], ['\[', '\]'], ['{', '}']] ],
-    \ [ '*.tex' , [['(', ')'], ['\[', '\]']] ],
-    \ [ '*.cpp' , [['(', ')'], ['\[', '\]'], ['{', '}']] ],
-    \ [ '*.{html,htm}' , [['(', ')'], ['\[', '\]'], ['{', '}'], ['<\a[^>]*>', '</[^>]*>']] ],
-    \ ]
-let g:rainbow_guifgs = ['RoyalBlue3', 'DarkOrange3', 'DarkOrchid3', 'FireBrick']
-let g:rainbow_ctermfgs = ['lightblue', 'lightgreen', 'yellow', 'red', 'magenta']
 
 
 """""""""""" quick-scope
@@ -716,8 +731,15 @@ highlight QuickScopePrimary guifg='#afff5f' gui=underline ctermfg=155 cterm=unde
 highlight QuickScopeSecondary guifg='#5fffff' gui=underline ctermfg=81 cterm=underline
 
 
+
 autocmd BufWritePre * :%s/\s\+$//e
 
 
 
+
 """"""""
+
+"""" Git Gutter
+
+let g:gitgutter_enabled = 1
+
