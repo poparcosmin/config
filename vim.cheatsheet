@@ -1,0 +1,11 @@
+# vim-airline / tabs
+:bnext
+:bprevious
+:bfirst
+:blast
+:b10
+<super> 1 / 2 / 3 / / 4
+
+
+
+

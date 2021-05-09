@@ -4,15 +4,11 @@
 "" Vim-Plug core
 "*****************************************************************************
 let vimplug_exists=expand('~/.config/nvim/autoload/plug.vim')
-if has('win32')&&!has('win64')
-  let curl_exists=expand('C:\Windows\Sysnative\curl.exe')
-else
-  let curl_exists=expand('curl')
-endif
+let curl_exists=expand('curl')
 
 let g:vim_bootstrap_langs = "javascript,php,html,python,typescript"
 let g:vim_bootstrap_editor = "nvim"				" nvim or vim
-let g:vim_bootstrap_theme = "dracula"
+let g:vim_bootstrap_theme = "gruvbox"
 let g:vim_bootstrap_frams = "vuejs"
 
 if !filereadable(vimplug_exists)
@@ -43,6 +39,17 @@ Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
 Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'ryanoasis/vim-devicons'
 Plug 'pbrisbin/vim-mkdir'
+Plug 'frazrepo/vim-rainbow'
+
+Plug 'nvim-lua/popup.nvim'
+Plug 'nvim-lua/plenary.nvim'
+Plug 'nvim-telescope/telescope.nvim'
+Plug 'nvim-telescope/telescope-fzy-native.nvim'
+
+"Plug 'ambv/black'
+
+
+
 "*****************************************************************************
 "" Plug install packages
 "*****************************************************************************
@@ -108,7 +115,7 @@ Plug 'stephpy/vim-php-cs-fixer'
 
 " python
 "" Python Bundle
-Plug 'davidhalter/jedi-vim'
+"Plug 'davidhalter/jedi-vim'
 Plug 'raimon49/requirements.txt.vim', {'for': 'requirements'}
 
 
@@ -137,9 +144,33 @@ call plug#end()
 filetype plugin indent on
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 "*****************************************************************************
 "" Basic Setup
 "*****************************************************************************"
+"" Map leader to ,
+let mapleader=' '
+
+
+"Kite
+let g:kite_tab_complete=1
+
+
 "" Encoding
 set encoding=utf-8
 set fileencoding=utf-8
@@ -155,17 +186,14 @@ set softtabstop=0
 set shiftwidth=4
 set expandtab
 
-"" Map leader to ,
-let mapleader=' '
 
 "" Enable hidden buffers
 set hidden
 
 "" Searching
 set hlsearch
-set incsearch
+"set smartcase
 set ignorecase
-set smartcase
 
 "" Custom
 set noswapfile
@@ -175,10 +203,87 @@ set smarttab
 set list
 set showcmd
 set ruler
-
+set scrolloff=10
+set signcolumn=yes
+set cmdheight=2
 
 " Enable CursorLine
 set cursorline
+set ruler
+set number
+set relativenumber
+set nohlsearch
+set showmatch
+
+:augroup numbertoggle
+:  autocmd!
+:  autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
+:  autocmd BufLeave,FocusLost,InsertEnter   * set norelativenumber
+:augroup END
+
+
+set fileformats=unix
+set list lcs=tab:\¦\      "(here is a space)
+
+if exists('$SHELL')
+    set shell=$SHELL
+else
+    set shell=/bin/sh
+endif
+
+if (has("termguicolors"))
+    set termguicolors
+endif
+set background=dark
+
+
+set mousemodel=popup
+set t_Co=256
+set guioptions=egmrti
+set gfn=Monospace\ 10
+
+
+
+"diference in changed text after saved/////;;;.....
+nnoremap <Leader>df :call DiffOrig()<CR>
+
+function! DiffOrig()
+    if !exists("b:diff_active") && &buftype == "nofile"
+        echoerr "E: Cannot diff a scratch buffer"
+        return -1
+    elseif expand("%") == ""
+        echoerr "E: Buffer doesn't exist on disk"
+        return -1
+    endif
+
+    if !exists("b:diff_active") || b:diff_active == 0
+        let b:diff_active = 1
+        let l:orig_filetype = &l:filetype
+
+        leftabove vnew
+        let t:diff_buffer = bufnr("%")
+        set buftype=nofile
+
+        read #
+        0delete_
+        let &l:filetype = l:orig_filetype
+
+        diffthis
+        wincmd p
+        diffthis
+    else
+        diffoff
+        execute "bdelete " . t:diff_buffer
+        let b:diff_active = 0
+    endif
+endfunction
+
+
+
+
+let &t_SI = "\e[6 q"      " Make cursor a line in insert
+let &t_EI = "\e[2 q"      " Make cursor a line in insert
+
 
 highlight  CursorLine ctermbg=Yellow ctermfg=None
 autocmd InsertEnter * highlight  CursorLine ctermbg=Green ctermfg=Red
@@ -187,47 +292,21 @@ autocmd InsertLeave * highlight  CursorLine ctermbg=Yellow ctermfg=None
 
 
 
-
-
-
-
-
-
-
-set fileformats=unix
-
-if exists('$SHELL')
-    set shell=$SHELL
-else
-    set shell=/bin/sh
-endif
-
 " session management
 let g:session_directory = "~/.config/nvim/session"
 let g:session_autoload = "no"
 let g:session_autosave = "no"
 let g:session_command_aliases = 1
 
-"*****************************************************************************
-"" Visual Settings
-"*****************************************************************************
 syntax on
-set ruler
-set number relativenumber
-
-let no_buffers_menu=1
-
-if (has("termguicolors"))
- set termguicolors
-endif
-set background=dark
 colorscheme gruvbox
 
 
-set mousemodel=popup
-set t_Co=256
-set guioptions=egmrti
-set gfn=Monospace\ 10
+
+let no_buffers_menu=1
+
+
+
 
 if has("gui_running")
   if has("gui_mac") || has("gui_macvim")
@@ -284,6 +363,23 @@ let g:airline#extensions#ale#enabled = 1
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tagbar#enabled = 1
 let g:airline_skip_empty_sections = 1
+let g:airline#extensions#tabline#show_close_button = 1
+
+
+"vim-airline TABS
+"switch tab
+nmap <leader>1 :bfirst<CR>
+nmap <leader>2 :bfirst<CR>:bn<CR>
+nmap <leader>3 :bfirst<CR>:2bn<CR>
+nmap <leader>4 :bfirst<CR>:3bn<CR>
+nmap <leader>5 :bfirst<CR>:4bn<CR>
+nmap <leader>6 :bfirst<CR>:5bn<CR>
+nmap <leader>7 :bfirst<CR>:6bn<CR>
+"close tab
+nmap <leader>` :bd<CR>
+
+
+
 
 "*****************************************************************************
 "" Abbreviations
@@ -315,7 +411,7 @@ set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*.pyc,*.db,*.sqlite
 nnoremap <silent> <F2> :NERDTreeToggle<CR>
 
 " grep.vim
-nnoremap <silent> <leader>f :Rgrep<CR>
+"nnoremap <silent> <leader>f :Rgrep<CR>
 let Grep_Default_Options = '-IR'
 let Grep_Skip_Files = '*.log *.db'
 let Grep_Skip_Dirs = '.git node_modules'
@@ -412,7 +508,10 @@ noremap <Leader>te :tabe <C-R>=expand("%:p:h") . "/" <CR>
 "" fzf.vim
 set wildmode=list:longest,list:full
 set wildignore+=*.o,*.obj,.git,*.rbc,*.pyc,__pycache__
-let $FZF_DEFAULT_COMMAND =  "find * -path '*/\.*' -prune -o -path 'node_modules/**' -prune -o -path 'target/**' -prune -o -path 'dist/**' -prune -o  -type f -print -o -type l -print 2> /dev/null"
+"search files fzf ctrl+f
+nnoremap <silent> <C-f> :Files<CR>
+
+
 
 " The Silver Searcher
 if executable('ag')
@@ -440,7 +539,19 @@ let g:UltiSnipsJumpBackwardTrigger="<c-b>"
 let g:UltiSnipsEditSplit="vertical"
 
 " ale
-let g:ale_linters = {}
+let g:ale_linters = {'python':['flake8',]}
+let g:ale_fixers = {'*':['remove_trailing_lines', 'trim_whitespace'],'python':['black','isort']}
+let g:ale_fix_on_save = 1
+let g:ale_sign_error = '>>'
+let g:ale_sign_warning = '--'
+
+let g:ale_python_flake8_options = '--max-line-length=120'
+let g:ale_python_black_options = '--line-length 120'
+
+highlight clear ALEErrorSign
+highlight clear ALEWarningSign
+
+
 
 " Tagbar
 nmap <silent> <F3> :TagbarToggle<CR>
@@ -518,55 +629,67 @@ augroup END
 " php
 " Phpactor plugin
 " Include use statement
-nmap <Leader>u :call phpactor#UseAdd()<CR>
+"nmap <Leader>u :call phpactor#UseAdd()<CR>
 " Invoke the context menu
-nmap <Leader>mm :call phpactor#ContextMenu()<CR>
+"nmap <Leader>mm :call phpactor#ContextMenu()<CR>
 " Invoke the navigation menu
-nmap <Leader>nn :call phpactor#Navigate()<CR>
+"nmap <Leader>nn :call phpactor#Navigate()<CR>
 " Goto definition of class or class member under the cursor
-nmap <Leader>oo :call phpactor#GotoDefinition()<CR>
-nmap <Leader>oh :call phpactor#GotoDefinitionHsplit()<CR>
-nmap <Leader>ov :call phpactor#GotoDefinitionVsplit()<CR>
-nmap <Leader>ot :call phpactor#GotoDefinitionTab()<CR>
+"nmap <Leader>oo :call phpactor#GotoDefinition()<CR>
+"nmap <Leader>oh :call phpactor#GotoDefinitionHsplit()<CR>
+"nmap <Leader>ov :call phpactor#GotoDefinitionVsplit()<CR>
+"nmap <Leader>ot :call phpactor#GotoDefinitionTab()<CR>
 " Show brief information about the symbol under the cursor
-nmap <Leader>K :call phpactor#Hover()<CR>
+"nmap <Leader>K :call phpactor#Hover()<CR>
 " Transform the classes in the current file
-nmap <Leader>tt :call phpactor#Transform()<CR>
+"nmap <Leader>tt :call phpactor#Transform()<CR>
 " Generate a new class (replacing the current file)
-nmap <Leader>cc :call phpactor#ClassNew()<CR>
+"nmap <Leader>cc :call phpactor#ClassNew()<CR>
 " Extract expression (normal mode)
-nmap <silent><Leader>ee :call phpactor#ExtractExpression(v:false)<CR>
+"nmap <silent><Leader>ee :call phpactor#ExtractExpression(v:false)<CR>
 " Extract expression from selection
-vmap <silent><Leader>ee :<C-U>call phpactor#ExtractExpression(v:true)<CR>
+"vmap <silent><Leader>ee :<C-U>call phpactor#ExtractExpression(v:true)<CR>
 " Extract method from selection
-vmap <silent><Leader>em :<C-U>call phpactor#ExtractMethod()<CR>
+"vmap <silent><Leader>em :<C-U>call phpactor#ExtractMethod()<CR>
 
 
 " python
 " vim-python
 augroup vimrc-python
   autocmd!
-  autocmd FileType python setlocal expandtab shiftwidth=4 tabstop=8 colorcolumn=79
+  autocmd FileType python setlocal expandtab shiftwidth=4 tabstop=8 colorcolumn=120
       \ formatoptions+=croq softtabstop=4
       \ cinwords=if,elif,else,for,while,try,except,finally,def,class,with
 augroup END
 
+
+autocmd FileType python map <buffer> <F9> :w<CR>:exec '!~/.env/bin/python3.9' shellescape(@%, 1)<CR>
+autocmd FileType python imap <buffer> <F9> <esc>:w<CR>:exec '!~/.env/bin/python3.9' shellescape(@%, 1)<CR>
+
+
+autocmd FileType python map <buffer> <F10> :w<CR>:exec '!~/.env/bin/pytest --cov-report term-missing --cov="."' shellescape(@%, 1)<CR>
+autocmd FileType python imap <buffer> <F10> <esc>:w<CR>:exec '!~/.env/bin/pytest --cov-report term-missing --cov="."'  shellescape(@%, 1)<CR>
+
 let g:python3_host_prog = expand("~/.env/bin/python3.9")
+"autocmd BufWritePre *.py execute ':Black'
+
+
+
 
 " jedi-vim
-let g:jedi#popup_on_dot = 0
-let g:jedi#goto_assignments_command = "<leader>g"
-let g:jedi#goto_definitions_command = "<leader>d"
-let g:jedi#documentation_command = "K"
-let g:jedi#usages_command = "<leader>n"
-let g:jedi#rename_command = "<leader>r"
-let g:jedi#show_call_signatures = "0"
-let g:jedi#completions_command = "<C-Space>"
-let g:jedi#smart_auto_mappings = 0
+"let g:jedi#popup_on_dot = 0
+"let g:jedi#goto_assignments_command = "<leader>g"
+"let g:jedi#goto_definitions_command = "<leader>d"
+"let g:jedi#documentation_command = "K"
+"let g:jedi#usages_command = "<leader>n"
+"let g:jedi#rename_command = "<leader>r"
+"let g:jedi#show_call_signatures = "0"
+"let g:jedi#completions_command = "<C-Space>"
+"let g:jedi#smart_auto_mappings = 0
 
 " ale
-:call extend(g:ale_linters, {
-    \'python': ['flake8'], })
+"":call extend(g:ale_linters, {
+""    \'python': ['flake8'], })
 
 " vim-airline
 let g:airline#extensions#virtualenv#enabled = 1
@@ -715,17 +838,11 @@ call which_key#register('<Space>', "g:which_key_map")
 
 
 
-"""""""""""" NERD Commenter
- vmap <C-/> <plug>NERDCommenterToggle
- nmap <C-/> <plug>NERCommenterToggleD
 
 
 
 
 """""""""""" quick-scope
-" Trigger a highlight in the appropriate direction when pressing these keys:
-" let g:qs_highlight_on_keys = ['f', 'F', 't', 'T']
-" Trigger a highlight only when pressing f and F.
 let g:qs_highlight_on_keys = ['f', 'F']
 highlight QuickScopePrimary guifg='#afff5f' gui=underline ctermfg=155 cterm=underline
 highlight QuickScopeSecondary guifg='#5fffff' gui=underline ctermfg=81 cterm=underline
@@ -738,8 +855,45 @@ autocmd BufWritePre * :%s/\s\+$//e
 
 
 """"""""
-
 """" Git Gutter
+
 
 let g:gitgutter_enabled = 1
 
+""""" 'frazrepo/vim-rainbow'
+
+let g:rainbow_active = 1
+
+let g:rainbow_load_separately = [
+    \ [ '*' , [['(', ')'], ['\[', '\]'], ['{', '}']] ],
+    \ [ '*.tex' , [['(', ')'], ['\[', '\]']] ],
+    \ [ '*.cpp' , [['(', ')'], ['\[', '\]'], ['{', '}']] ],
+    \ [ '*.{html,htm}' , [['(', ')'], ['\[', '\]'], ['{', '}'], ['<\a[^>]*>', '</[^>]*>']] ],
+    \ ]
+
+let g:rainbow_guifgs = ['RoyalBlue3', 'DarkOrange3', 'DarkOrchid3', 'FireBrick']
+let g:rainbow_ctermfgs = ['lightblue', 'lightgreen', 'yellow', 'red', 'magenta']
+
+"
+""
+nnoremap <leader>f :lua require("telescope.builtin").find_files{prompt_title = "< Work >", cwd = "$HOME/Alemele/Work/"}<CR>
+
+
+"
+
+
+"
+"
+"
+"
+"
+"cărui poveste a făcut înconjurul planetei zilele acestea,
+"ne pune în faţă o oglindă. Este o poveste despre nepăsare,
+"despre diluarea legislaţiei europene de protecţie a mediului
+"prin cutume administrative naţionale sau locale abuzive,
+"despre fentarea regulilor, în timp ce vbw
+"
+"
+"
+"
+"
