@@ -48,7 +48,13 @@ Plug 'nvim-telescope/telescope-fzy-native.nvim'
 
 "Plug 'ambv/black'
 
+Plug 'tpope/vim-surround'
+Plug 'tpope/vim-repeat'
 
+Plug 'turbio/bracey.vim'
+"cd /home/cosmin/.config/nvim/plugged/bracey.vim; npm install --prefix server;
+
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 "*****************************************************************************
 "" Plug install packages
@@ -242,6 +248,10 @@ set t_Co=256
 set guioptions=egmrti
 set gfn=Monospace\ 10
 
+"emmet
+let g:user_emmet_install_global = 0
+autocmd FileType html,css EmmetInstall
+"let g:user_emmet_leader_key='<tab>'
 
 
 "diference in changed text after saved/////;;;.....
@@ -880,6 +890,7 @@ nnoremap <leader>f :lua require("telescope.builtin").find_files{prompt_title = "
 
 
 "
+
 
 
 "
